@@ -701,11 +701,17 @@ function TerminalViewModel(loginStateViewModel) {
     self.isLoading = ko.observable(undefined);
 
     self.autoscrollEnabled = ko.observable(true);
+    self.filterGCode = ko.observable(false);
     self.filterM105 = ko.observable(false);
     self.filterM27 = ko.observable(false);
 
+    self.regexGCode = /(Send: N)|(Recv: ok$)/;
     self.regexM105 = /(Send: M105)|(Recv: ok T:)/;
     self.regexM27 = /(Send: M27)|(Recv: SD printing byte)/;
+
+    self.filterGCode.subscribe(function(newValue) {
+        self.updateOutput();
+    });
 
     self.filterM105.subscribe(function(newValue) {
         self.updateOutput();
@@ -754,6 +760,7 @@ function TerminalViewModel(loginStateViewModel) {
 
         var output = "";
         for (var i = 0; i < self.log.length; i++) {
+            if (self.filterGCode() && self.log[i].match(self.regexGCode)) continue;
             if (self.filterM105() && self.log[i].match(self.regexM105)) continue;
             if (self.filterM27() && self.log[i].match(self.regexM27)) continue;
 
